@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 
 // --- Primitives ---
 
@@ -23,9 +23,109 @@ const SectionLabel = ({ index, label }) => (
   </div>
 );
 
-// --- Sections ---
+// --- Global Interactive Modals ---
 
-const Nav = () => (
+const VideoModal = ({ isOpen, onClose, videoUrl }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-md"
+        onClick={onClose}
+      >
+        <motion.div 
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="relative w-full max-w-4xl overflow-hidden aspect-video bg-surface border border-border shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors bg-background/80 px-3 py-1.5 rounded-full backdrop-blur-sm border border-border"
+          >
+            Close ✕
+          </button>
+          <iframe 
+            src={videoUrl} 
+            webkitallowfullscreen="true" 
+            mozallowfullscreen="true" 
+            allowfullscreen="true" 
+            className="w-full h-full border-0"
+            title="System Architecture Walkthrough"
+          ></iframe>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+const BookingModal = ({ isOpen, onClose }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-md"
+        onClick={onClose}
+      >
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 20, opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="relative w-full max-w-lg bg-background border border-border p-8 md:p-10 shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button 
+            onClick={onClose}
+            className="absolute top-6 right-6 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ✕
+          </button>
+          <div className="mb-6">
+            <span className="eyebrow text-accent block mb-2">Boutique Partnership</span>
+            <h3 className="display-serif text-3xl text-foreground">Initiate Scoping</h3>
+          </div>
+          <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
+            Select a confidential timeslot to map your current intake architecture and assess potential operational ROI.
+          </p>
+          
+          {/* Static representation of an institutional booking widget */}
+          <div className="space-y-4">
+            <div className="border border-border p-4 rounded bg-surface hover:border-accent transition-colors cursor-pointer flex justify-between items-center">
+              <div>
+                <div className="text-sm font-medium text-foreground">15-Min Exploratory Call</div>
+                <div className="text-xs text-muted-foreground">Initial alignment & bottleneck analysis</div>
+              </div>
+              <span className="text-accent text-sm">&rarr;</span>
+            </div>
+            <div className="border border-border p-4 rounded bg-surface hover:border-accent transition-colors cursor-pointer flex justify-between items-center">
+              <div>
+                <div className="text-sm font-medium text-foreground">45-Min Technical Deep Dive</div>
+                <div className="text-xs text-muted-foreground">Legacy CRM & pipeline evaluation</div>
+              </div>
+              <span className="text-accent text-sm">&rarr;</span>
+            </div>
+          </div>
+          
+          <div className="mt-8 pt-6 border-t border-border flex items-center gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Next available openings: This week</span>
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+// --- Layout Components ---
+
+const Nav = ({ onBookCall }) => (
   <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/70 border-b border-border h-14">
     <div className="container-tight h-full flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -38,14 +138,17 @@ const Nav = () => (
         <a href="#process" className="hover:text-foreground transition-colors">Process</a>
         <a href="#case" className="hover:text-foreground transition-colors">Case study</a>
       </div>
-      <a href="#contact" className="hidden md:inline-flex bg-foreground text-background px-4 py-1.5 rounded-full text-xs font-medium hover:bg-accent hover:text-background transition-colors">
+      <button 
+        onClick={onBookCall}
+        className="hidden md:inline-flex bg-foreground text-background px-4 py-1.5 rounded-full text-xs font-medium hover:bg-accent hover:text-background transition-colors"
+      >
         Book a call &rarr;
-      </a>
+      </button>
     </div>
   </nav>
 );
 
-const Hero = () => {
+const Hero = ({ onWatchVideo, onBookCall }) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
@@ -57,7 +160,7 @@ const Hero = () => {
         backgroundImage: 'linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px)',
         backgroundSize: '48px 48px',
         maskImage: 'radial-gradient(ellipse at top, black, transparent 80%)'
-      }}></div>
+      }}></div >
       
       <motion.div style={{ y, opacity }} className="container-tight relative z-10">
         <Reveal>
@@ -72,12 +175,18 @@ const Hero = () => {
             We are a specialized consulting & development shop that helps boutique M&A firms and business brokers eliminate the operational drag in their NDA execution and buyer routing.
           </p>
           <div className="flex items-center gap-6 mb-20">
-            <a href="#contact" className="bg-foreground text-background px-6 py-3 rounded-full text-sm font-medium hover:bg-accent transition-colors flex items-center gap-2">
+            <button 
+              onClick={onBookCall}
+              className="bg-foreground text-background px-6 py-3 rounded-full text-sm font-medium hover:bg-accent transition-colors flex items-center gap-2"
+            >
               Book a Strategy Call &rarr;
-            </a>
-            <a href="#infrastructure" className="text-muted-foreground text-sm hover:text-foreground transition-colors border-b border-transparent hover:border-border">
-              See the infrastructure
-            </a>
+            </button>
+            <button 
+              onClick={onWatchVideo}
+              className="text-muted-foreground text-sm hover:text-foreground transition-colors border-b border-transparent hover:border-border flex items-center gap-1.5"
+            >
+              Watch 2-Min System Walkthrough
+            </button>
           </div>
         </Reveal>
 
@@ -109,7 +218,6 @@ const ProblemSolution = () => (
         </h2>
       </Reveal>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-border border border-border">
-        {/* The Drag */}
         <div className="bg-background p-8 md:p-10">
           <div className="eyebrow text-danger mb-5">The Drag</div>
           <p className="text-foreground text-xl display-serif mb-8">What's costing you the deal.</p>
@@ -129,7 +237,6 @@ const ProblemSolution = () => (
             ))}
           </ul>
         </div>
-        {/* The Leverage */}
         <div className="bg-surface p-8 md:p-10 border-t-2 border-t-accent">
           <div className="eyebrow text-accent mb-5">The Leverage</div>
           <p className="text-foreground text-xl display-serif mb-8">What we put in its place.</p>
@@ -205,6 +312,14 @@ const Infrastructure = () => (
           </Reveal>
         ))}
       </div>
+      
+      {/* Security & Compliance Guardrail Disclaimer */}
+      <Reveal className="mt-8 flex items-start gap-4 p-5 border border-border bg-background rounded-lg max-w-3xl">
+        <div className="text-accent text-sm font-mono mt-0.5">⚠️</div>
+        <div className="text-xs text-muted-foreground leading-relaxed">
+          <strong className="text-foreground">Security & Compliance Guardrail:</strong> Systems are built utilizing strictly isolated, single-tenant private execution pipelines. Transaction details, buyer parameters, and legal documents are completely firewalled and never leveraged to train public artificial intelligence models.
+        </div>
+      </Reveal>
     </div>
   </section>
 );
@@ -254,7 +369,7 @@ const Process = () => (
   </section>
 );
 
-const CaseStudy = () => (
+const CaseStudy = ({ onWatchVideo }) => (
   <section id="case" className="py-20 md:py-24 bg-surface border-b border-border overflow-hidden">
     <div className="container-tight">
       <SectionLabel index="04" label="Proof of Concept" />
@@ -271,7 +386,10 @@ const CaseStudy = () => (
               <p className="text-muted-foreground text-base mb-8 max-w-xl leading-relaxed">
                 See how we successfully mapped a legacy M&A firm's intake process to a modern routing system, stripping hours of manual touchpoints from their weekly operational drag.
               </p>
-              <button className="bg-foreground text-background px-5 py-3 rounded-full text-xs font-medium hover:bg-accent transition-colors inline-flex items-center gap-2">
+              <button 
+                onClick={onWatchVideo}
+                className="bg-foreground text-background px-5 py-3 rounded-full text-xs font-medium hover:bg-accent transition-colors inline-flex items-center gap-2"
+              >
                 Watch the 2-Minute Breakdown <span>&rarr;</span>
               </button>
             </div>
@@ -310,15 +428,25 @@ const Footer = () => (
 );
 
 export default function App() {
+  const [videoOpen, setVideoOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  
+  // Replace this placeholder string with your specific Loom embed video URL tonight
+  const targetLoomEmbedUrl = "https://www.loom.com/embed/placeholder-id-here";
+
   return (
     <div className="antialiased min-h-screen">
-      <Nav />
+      <Nav onBookCall={() => setBookingOpen(true)} />
       <main>
-        <Hero />
+        <Hero 
+          onWatchVideo={() => setVideoOpen(true)} 
+          onBookCall={() => setBookingOpen(true)} 
+        />
         <ProblemSolution />
         <Infrastructure />
         <Process />
-        <CaseStudy />
+        <CaseStudy onWatchVideo={() => setVideoOpen(true)} />
+        
         <section id="contact" className="py-32 text-center container-tight border-b border-border">
           <Reveal>
              <div className="eyebrow mb-8 text-muted-foreground">Engage</div>
@@ -328,13 +456,27 @@ export default function App() {
              <p className="text-muted-foreground text-base mb-10 max-w-lg mx-auto">
                Engagements are scoped quarterly. We work with a limited number of boutique firms at a time.
              </p>
-             <a href="mailto:hello@cascadefirm.com" className="inline-flex bg-foreground text-background px-7 py-3.5 rounded-full text-sm font-medium hover:bg-accent transition-colors items-center gap-2">
+             <button 
+               onClick={() => setBookingOpen(true)}
+               className="inline-flex bg-foreground text-background px-7 py-3.5 rounded-full text-sm font-medium hover:bg-accent transition-colors items-center gap-2"
+             >
                Book a Strategy Call &rarr;
-             </a>
+             </button>
           </Reveal>
         </section>
       </main>
       <Footer />
+
+      {/* Shared Interactive Layer Overlay Components */}
+      <VideoModal 
+        isOpen={videoOpen} 
+        onClose={() => setVideoOpen(false)} 
+        videoUrl={targetLoomEmbedUrl} 
+      />
+      <BookingModal 
+        isOpen={bookingOpen} 
+        onClose={() => setBookingOpen(false)} 
+      />
     </div>
   );
 }
