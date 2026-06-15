@@ -1,0 +1,340 @@
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'motion/react';
+
+// --- Primitives ---
+
+const Reveal = ({ children, delay = 0, className = "" }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-60px" }}
+    transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
+
+const SectionLabel = ({ index, label }) => (
+  <div className="flex items-center gap-4 mb-12">
+    <span className="font-mono text-accent text-sm">{index}</span>
+    <div className="h-[1px] w-8 bg-border-strong"></div>
+    <span className="eyebrow">{label}</span>
+  </div>
+);
+
+// --- Sections ---
+
+const Nav = () => (
+  <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/70 border-b border-border h-14">
+    <div className="container-tight h-full flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+        <span className="font-medium tracking-tight text-foreground text-sm">Cascade Firm</span>
+      </div>
+      <div className="hidden md:flex items-center gap-8 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+        <a href="#problem" className="hover:text-foreground transition-colors">Approach</a>
+        <a href="#infrastructure" className="hover:text-foreground transition-colors">Infrastructure</a>
+        <a href="#process" className="hover:text-foreground transition-colors">Process</a>
+        <a href="#case" className="hover:text-foreground transition-colors">Case study</a>
+      </div>
+      <a href="#contact" className="hidden md:inline-flex bg-foreground text-background px-4 py-1.5 rounded-full text-xs font-medium hover:bg-accent hover:text-background transition-colors">
+        Book a call &rarr;
+      </a>
+    </div>
+  </nav>
+);
+
+const Hero = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.2]);
+
+  return (
+    <section ref={ref} id="top" className="relative pt-32 pb-20 overflow-hidden border-b border-border">
+      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" style={{
+        backgroundImage: 'linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px)',
+        backgroundSize: '48px 48px',
+        maskImage: 'radial-gradient(ellipse at top, black, transparent 80%)'
+      }}></div>
+      
+      <motion.div style={{ y, opacity }} className="container-tight relative z-10">
+        <Reveal>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-1.5 h-1.5 rounded-sm bg-accent"></div>
+            <span className="eyebrow">AI Systems For Lower-Middle-Market M&A</span>
+          </div>
+          <h1 className="display-serif text-[clamp(2.5rem,6vw,5rem)] max-w-4xl mb-6 text-foreground leading-[1.05]">
+            Automate Your Deal Intake. <span className="italic text-accent">Close Faster.</span>
+          </h1>
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mb-10 leading-relaxed">
+            We are a specialized consulting & development shop that helps boutique M&A firms and business brokers eliminate the operational drag in their NDA execution and buyer routing.
+          </p>
+          <div className="flex items-center gap-6 mb-20">
+            <a href="#contact" className="bg-foreground text-background px-6 py-3 rounded-full text-sm font-medium hover:bg-accent transition-colors flex items-center gap-2">
+              Book a Strategy Call &rarr;
+            </a>
+            <a href="#infrastructure" className="text-muted-foreground text-sm hover:text-foreground transition-colors border-b border-transparent hover:border-border">
+              See the infrastructure
+            </a>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.2} className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-border border border-border">
+          {[
+            ["94%", "Reduction in NDA turnaround"],
+            ["3.2x", "Faster buyer qualification"],
+            ["0", "Manual data room emails"],
+            ["24/7", "Always-on intake"]
+          ].map(([stat, desc], i) => (
+            <div key={i} className="bg-background p-6">
+              <div className="display-serif text-4xl mb-2 text-foreground">{stat}</div>
+              <div className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground">{desc}</div>
+            </div>
+          ))}
+        </Reveal>
+      </motion.div>
+    </section>
+  );
+};
+
+const ProblemSolution = () => (
+  <section id="problem" className="py-20 md:py-24 border-b border-border">
+    <div className="container-tight">
+      <SectionLabel index="01" label="The Shift" />
+      <Reveal>
+        <h2 className="display-serif text-4xl md:text-5xl max-w-2xl mb-12 text-foreground">
+          From operational drag to <span className="italic text-accent">compounding leverage.</span>
+        </h2>
+      </Reveal>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-border border border-border">
+        {/* The Drag */}
+        <div className="bg-background p-8 md:p-10">
+          <div className="eyebrow text-danger mb-5">The Drag</div>
+          <p className="text-foreground text-xl display-serif mb-8">What's costing you the deal.</p>
+          <ul className="space-y-6">
+            {[
+              "Manual NDA chasing",
+              "Fragmented data rooms",
+              "Scattered CRM updates",
+              "Lost momentum on hot listings"
+            ].map((item, i) => (
+              <Reveal key={i} delay={0.1 + (i * 0.05)}>
+                <li className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="text-border-strong">—</span>
+                  <span>{item}</span>
+                </li>
+              </Reveal>
+            ))}
+          </ul>
+        </div>
+        {/* The Leverage */}
+        <div className="bg-surface p-8 md:p-10 border-t-2 border-t-accent">
+          <div className="eyebrow text-accent mb-5">The Leverage</div>
+          <p className="text-foreground text-xl display-serif mb-8">What we put in its place.</p>
+          <ul className="space-y-6">
+            {[
+              "Zero-touch NDA execution",
+              "Automated buyer qualification",
+              "Instantly provisioned data rooms",
+              "Real-time partner alerts"
+            ].map((item, i) => (
+              <Reveal key={i} delay={0.1 + (i * 0.05)}>
+                <li className="flex items-center gap-4 text-sm text-foreground">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent shrink-0"></div>
+                  <span>{item}</span>
+                </li>
+              </Reveal>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const Infrastructure = () => (
+  <section id="infrastructure" className="py-20 md:py-24 bg-surface border-b border-border">
+    <div className="container-tight">
+      <SectionLabel index="02" label="Core Infrastructure" />
+      <Reveal>
+        <h2 className="display-serif text-4xl md:text-5xl max-w-3xl mb-12 text-foreground">
+          Three systems. <span className="italic text-foreground">One intake pipeline.</span>
+        </h2>
+      </Reveal>
+      <div className="flex flex-col gap-[1px] bg-border border border-border">
+        {[
+          {
+            num: "I",
+            title: "Automated NDA Execution",
+            desc: "Lead submits form → AI classifies intent → Custom NDA auto-generates → Sent for signature via DocuSign / PandaDoc.",
+            steps: ["Form", "Classify", "Generate", "Sign"]
+          },
+          {
+            num: "II",
+            title: "Intelligent CRM Routing",
+            desc: "Signed NDAs trigger automated profile creation in your CRM, categorizing buyers by industry and liquidity criteria.",
+            steps: ["NDA Signed", "Profile", "Categorize", "Route"]
+          },
+          {
+            num: "III",
+            title: "Data Room Provisioning",
+            desc: "Qualified buyers are instantly granted gated access to the correct listing data room, removing the manual email bottleneck.",
+            steps: ["Qualify", "Match Listing", "Provision", "Notify"]
+          }
+        ].map((sys, i) => (
+          <Reveal key={i} delay={i * 0.1} className="bg-background p-8 md:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
+              <div className="md:col-span-1 display-serif text-4xl text-accent">{sys.num}</div>
+              <div className="md:col-span-4">
+                <h3 className="display-serif text-2xl md:text-3xl text-foreground">{sys.title}</h3>
+              </div>
+              <div className="md:col-span-7">
+                <p className="text-muted-foreground text-sm md:text-base mb-6 leading-relaxed">{sys.desc}</p>
+                <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                  {sys.steps.map((step, idx) => (
+                    <React.Fragment key={idx}>
+                      <span className="border border-border px-2.5 py-1 rounded bg-background text-foreground">{step}</span>
+                      {idx < sys.steps.length - 1 && <span className="text-muted-foreground">&rarr;</span>}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const Process = () => (
+  <section id="process" className="py-20 md:py-24 border-b border-border">
+    <div className="container-tight">
+      <SectionLabel index="03" label="Our Process" />
+      <Reveal>
+        <h2 className="display-serif text-4xl md:text-5xl max-w-3xl mb-16 text-foreground">
+          A measured, <span className="italic text-foreground">three-step engagement.</span>
+        </h2>
+      </Reveal>
+      
+      <div className="relative">
+        <div className="hidden md:block absolute top-5 left-0 right-0 h-[1px] bg-border-strong z-0"></div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+          {[
+            {
+              num: "01",
+              title: "Exploratory Call",
+              desc: "In a brief call, we will map your current deal intake bottlenecks, show you where we see potential ROI, and determine if there's a fit."
+            },
+            {
+              num: "02",
+              title: "Scoping Engagement",
+              desc: "We analyze your legacy CRM and current intake tools, then deliver a custom execution plan."
+            },
+            {
+              num: "03",
+              title: "Build & Integrate",
+              desc: "We deploy the automation across your existing systems, training your brokers on the new, streamlined workflow."
+            }
+          ].map((step, i) => (
+            <Reveal key={i} delay={i * 0.15} className="flex flex-col">
+              <div className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center font-mono text-[10px] text-foreground mb-6">
+                {step.num}
+              </div>
+              <h3 className="display-serif text-2xl mb-3 text-accent">{step.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const CaseStudy = () => (
+  <section id="case" className="py-20 md:py-24 bg-surface border-b border-border overflow-hidden">
+    <div className="container-tight">
+      <SectionLabel index="04" label="Proof of Concept" />
+      <Reveal>
+        <div className="relative border border-border bg-background p-8 md:p-12 overflow-hidden">
+          <div className="absolute -right-32 -top-32 w-[24rem] h-[24rem] bg-accent/30 blur-[100px] rounded-full pointer-events-none"></div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center relative z-10">
+            <div className="md:col-span-7">
+              <div className="eyebrow text-accent mb-6">Featured Case Study</div>
+              <h2 className="display-serif text-4xl md:text-5xl mb-6 text-foreground leading-tight">
+                The Dallas Deal Flow <span className="italic">Prototype</span>
+              </h2>
+              <p className="text-muted-foreground text-base mb-8 max-w-xl leading-relaxed">
+                See how we successfully mapped a legacy M&A firm's intake process to a modern routing system, stripping hours of manual touchpoints from their weekly operational drag.
+              </p>
+              <button className="bg-foreground text-background px-5 py-3 rounded-full text-xs font-medium hover:bg-accent transition-colors inline-flex items-center gap-2">
+                Watch the 2-Minute Breakdown <span>&rarr;</span>
+              </button>
+            </div>
+            <div className="md:col-span-5 grid grid-cols-2 gap-[1px] bg-border border border-border">
+              {[
+                ["−87%", "Manual touchpoints"],
+                ["14 days", "From engagement to live"],
+                ["6", "Tools integrated"],
+                ["1", "Legacy CRM retired"]
+              ].map(([stat, desc], i) => (
+                <div key={i} className="bg-background p-6">
+                  <div className="display-serif text-3xl mb-2 text-foreground">{stat}</div>
+                  <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wide">{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+);
+
+const Footer = () => (
+  <footer className="py-10 border-t border-border">
+    <div className="container-tight flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="flex items-center gap-3">
+        <div className="w-1 h-1 rounded-sm bg-accent"></div>
+        <span className="text-xs text-muted-foreground">Cascade Firm — AI for M&A Operations</span>
+      </div>
+      <div className="font-mono text-[10px] text-muted-foreground">
+        &copy; 2026
+      </div>
+    </div>
+  </footer>
+);
+
+export default function App() {
+  return (
+    <div className="antialiased min-h-screen">
+      <Nav />
+      <main>
+        <Hero />
+        <ProblemSolution />
+        <Infrastructure />
+        <Process />
+        <CaseStudy />
+        <section id="contact" className="py-32 text-center container-tight border-b border-border">
+          <Reveal>
+             <div className="eyebrow mb-8 text-muted-foreground">Engage</div>
+             <h2 className="display-serif text-4xl md:text-6xl max-w-3xl mx-auto mb-8 text-foreground leading-tight">
+               Ready to remove the drag from your <span className="italic text-accent">intake pipeline?</span>
+             </h2>
+             <p className="text-muted-foreground text-base mb-10 max-w-lg mx-auto">
+               Engagements are scoped quarterly. We work with a limited number of boutique firms at a time.
+             </p>
+             <a href="mailto:hello@cascadefirm.com" className="inline-flex bg-foreground text-background px-7 py-3.5 rounded-full text-sm font-medium hover:bg-accent transition-colors items-center gap-2">
+               Book a Strategy Call &rarr;
+             </a>
+          </Reveal>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+}
